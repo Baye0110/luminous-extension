@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('captureBtn').addEventListener('click', function() {
       chrome.tabs.captureVisibleTab(null, { format: 'png' }, function (dataUrl) {
         chrome.tabCapture.capture({audio: true, video: false}, function(stream) {
+
+          var welcomeAudio = "welcome.mp3";
+
           // Convert Data URL to Blob
           var blob = dataURLToBlob(dataUrl);
 
@@ -10,15 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
           var screenshot_name = 'screenshot_' + timestamp + '.png';
           uploadToServer(blob, screenshot_name);
 
-          // Show the image after screenshot
-          var img = new Image();
-          img.src = dataUrl;
-          // Set image style to fit within the extension window
-          img.className = 'screenshot-image';
-          document.body.appendChild(img);
-
+          //create new Image
+          createImg(dataUrl);
+          
+          //Generate text box after image
+          generateTxt();
+    
           // Play the welcome audio first
-          playSound("welcome.mp3");
+          //playSound(welcomeAudio);
 
         
           startRecording(audioBlob => {
@@ -33,6 +35,28 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 });
+
+function createImg(dataUrl){
+  var oldImg = document.querySelector('.screenshot-image');
+  if (oldImg) {
+    document.body.removeChild(oldImg);
+  }
+  var img = new Image();
+  img.src = dataUrl;
+  img.className = 'screenshot-image';
+  document.body.appendChild(img);
+}
+
+function generateTxt(){
+  var oldInputBox = document.querySelector('input[type="text"]');
+  if (oldInputBox) {
+    document.body.removeChild(oldInputBox);
+  }
+  var inputBox = document.createElement('input');
+  inputBox.type = 'text';
+  inputBox.placeholder = 'Message ChatGPT';
+  document.body.appendChild(inputBox);
+}
 
 function playSound(audioName) {
   var audio = new Audio(audioName);
